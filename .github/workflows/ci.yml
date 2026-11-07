@@ -1,0 +1,42 @@
+name: Expense audit checks
+on:
+  push:
+    paths: ["backend/**", "frontend/**", "infra/**", ".github/workflows/ci.yml"]
+  pull_request:
+    paths: ["backend/**", "frontend/**", "infra/**", ".github/workflows/ci.yml"]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: reimbursement
+          POSTGRES_PASSWORD: development
+          POSTGRES_DB: reimbursement_v2_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U reimbursement -d reimbursement_v2_test"
+          --health-interval 3s --health-retries 20
+    env:
+      DATABASE_URL: postgresql+psycopg://reimbursement:development@127.0.0.1:5432/reimbursement_v2_test
+      CHECKPOINT_URL: postgresql://reimbursement:development@127.0.0.1:5432/reimbursement_v2_test?options=-csearch_path%3Dagent_runtime
+      FILE_ROOT: ../data/v2/test-files
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: "0.12.18", python-version: "3.13"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "24", cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: uv sync --locked
+        working-directory: backend
+      - run: uv run alembic upgrade head && uv run python -m reimbursement.bootstrap
+        working-directory: backend
+      - run: uv run ruff check src tests scripts && uv run mypy src/reimbursement && uv run pytest -q
+        working-directory: backend
+      - run: uv run python scripts/export_openapi.py
+        working-directory: backend
+      - run: npm ci && npm run types && npm run build && npm test
+        working-directory: frontend
+      - name: Check generated contracts are committed
+        run: git diff --exit-code -- backend/openapi.json frontend/src/api/generated.ts

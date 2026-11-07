@@ -1,0 +1,161 @@
+{
+  "dataset": "synthetic.v2",
+  "model_profile": {
+    "mode": "provider",
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "endpoint": "https://api.deepseek.com",
+    "prompt_version": "reimbursement.v2.1",
+    "graph_version": "reimbursement.v2.1"
+  },
+  "material_suite": {
+    "sample_count": 10,
+    "samples": [
+      {
+        "key": "payment_meal",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "invoice_meal",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "payment_refund",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "rail_ticket",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "order_unpaid",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "transfer_ambiguous",
+        "status": "recognized",
+        "differences": [
+          {
+            "field": "document_role",
+            "expected": "unknown",
+            "actual": "payment"
+          }
+        ]
+      },
+      {
+        "key": "invoice_wrong_company",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "itinerary",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "payment_multi",
+        "status": "recognized",
+        "differences": []
+      },
+      {
+        "key": "discounted",
+        "status": "recognized",
+        "differences": []
+      }
+    ]
+  },
+  "review_suite": {
+    "policy_version": "reimbursement-v1-001",
+    "cases": [
+      {
+        "workflow": "daily",
+        "status": "completed",
+        "expected_can_submit": true,
+        "actual_can_submit": true
+      },
+      {
+        "workflow": "no_invoice",
+        "status": "completed",
+        "expected_can_submit": true,
+        "actual_can_submit": true
+      },
+      {
+        "workflow": "travel",
+        "status": "completed",
+        "expected_can_submit": true,
+        "actual_can_submit": true
+      },
+      {
+        "workflow": "project",
+        "status": "completed",
+        "expected_can_submit": true,
+        "actual_can_submit": true
+      },
+      {
+        "workflow": "supply_chain",
+        "status": "completed",
+        "expected_can_submit": true,
+        "actual_can_submit": true
+      },
+      {
+        "workflow": "wrong_title",
+        "status": "completed",
+        "expected_can_submit": false,
+        "actual_can_submit": false
+      },
+      {
+        "workflow": "unpaid",
+        "status": "completed",
+        "expected_can_submit": false,
+        "actual_can_submit": false
+      },
+      {
+        "workflow": "ambiguous",
+        "status": "waiting_input",
+        "expected_can_submit": false,
+        "actual_can_submit": false
+      }
+    ]
+  },
+  "usage": {
+    "model_calls": 34,
+    "elapsed_seconds": 69.29
+  },
+  "current_total_case": {
+    "policy_version": "reimbursement-v1-002",
+    "result": "passed",
+    "model_calls": 4,
+    "reports": [
+      {
+        "valid": false,
+        "can_submit": false,
+        "summary": {
+          "checked": 12,
+          "blocking": 1,
+          "warnings": 0,
+          "line_total": "88.00",
+          "policy_version": "reimbursement-v1-002",
+          "declared_amount": "100.00"
+        }
+      },
+      {
+        "valid": true,
+        "can_submit": true,
+        "summary": {
+          "checked": 12,
+          "blocking": 0,
+          "warnings": 0,
+          "line_total": "88.00",
+          "policy_version": "reimbursement-v1-002",
+          "declared_amount": "88.00"
+        }
+      }
+    ],
+    "mobile_amount_values_visible": true
+  }
+}

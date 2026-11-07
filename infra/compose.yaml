@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:18.6
+    environment:
+      POSTGRES_USER: reimbursement
+      POSTGRES_PASSWORD: development
+      POSTGRES_DB: reimbursement_v2
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U reimbursement -d reimbursement_v2"]
+      interval: 3s
+      retries: 20
+  migrate:
+    build: ../backend
+    environment: &backend_env
+      DATABASE_URL: postgresql+psycopg://reimbursement:development@postgres:5432/reimbursement_v2
+      CHECKPOINT_URL: postgresql://reimbursement:development@postgres:5432/reimbursement_v2?options=-csearch_path%3Dagent_runtime
+      FILE_ROOT: /data/files
+    command: [sh, -c, "alembic upgrade head && python -m reimbursement.bootstrap"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  api:
+    build: ../backend
+    environment: *backend_env
+    volumes: [files:/data/files]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  worker:
+    build: ../backend
+    environment: *backend_env
+    command: [python, -m, reimbursement.worker]
+    volumes: [files:/data/files]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+  web:
+    build: ../frontend
+    ports: ["18880:80"]
+    depends_on: [api]
+volumes:
+  postgres_data:
+  files:

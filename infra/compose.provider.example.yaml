@@ -1,0 +1,11 @@
+# Supply values from an ignored local env file; never put real credentials here.
+services:
+  api:
+    environment: &model_env
+      MODEL_MODE: provider
+      MODEL_PROVIDER: ${MODEL_PROVIDER:-deepseek}
+      MODEL_NAME: ${MODEL_NAME:-deepseek-flash}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-https://api.deepseek.com}
+      MODEL_API_KEY: ${MODEL_API_KEY:?Configure MODEL_API_KEY in a local env file}
+  worker:
+    environment: *model_env
